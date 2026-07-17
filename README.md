@@ -48,21 +48,34 @@ Applied to every takedown, regardless of type:
 5. **A CDN / registrar is not the host** — only the origin host removes files.
 
 ## Quick start
-Clone into your agent's skills directory:
-```bash
-git clone https://github.com/goul4rt/content-takedown.git ~/.claude/skills/content-takedown
+
+**Install as a Claude Code plugin (recommended):**
 ```
+/plugin marketplace add goul4rt/content-takedown
+/plugin install content-takedown@goul4rt
+```
+
+**Or install as a personal skill** (clone the skill folder directly):
+```bash
+git clone https://github.com/goul4rt/content-takedown.git /tmp/ct \
+  && cp -r /tmp/ct/skills/content-takedown ~/.claude/skills/content-takedown
+```
+
 The skill auto-activates when a conversation matches its description (takedown, DMCA, counter-notice, delisting, revenge porn, deepfake removal, cybersquatting/UDRP, brand abuse…). In Claude Code you can also invoke it explicitly with `/content-takedown`.
 
 ## How it works
-Built on **progressive disclosure** so it stays fast and cheap to load:
+Packaged as a plugin, with the skill built on **progressive disclosure** so it stays fast and cheap to load:
 ```
-content-takedown/
-├── SKILL.md                       # always loaded: invariants, decision flow, routing table
-└── references/
-    ├── legal-regimes.md           # DMCA · DSA · TAKE IT DOWN · STF Tema 987 · ECA Digital · UK OSA · LCEN/SREN · DDG · RTBF
-    ├── forms-directory.md         # form & channel URLs (verify-at-runtime)
-    └── recon-fingerprints.md      # RDAP by TLD, CDN/host header fingerprints, abuse discovery
+content-takedown/                       # repo = Claude Code plugin + marketplace
+├── .claude-plugin/
+│   ├── plugin.json                     # plugin manifest
+│   └── marketplace.json                # marketplace manifest
+└── skills/content-takedown/
+    ├── SKILL.md                        # always loaded: invariants, decision flow, routing table
+    └── references/
+        ├── legal-regimes.md            # DMCA · DSA · TAKE IT DOWN · STF Tema 987 · ECA Digital · UK OSA · LCEN/SREN · DDG · RTBF
+        ├── forms-directory.md          # form & channel URLs (verify-at-runtime)
+        └── recon-fingerprints.md       # RDAP by TLD, CDN/host header fingerprints, abuse discovery
 ```
 Stable rules live in `SKILL.md`; fast-moving facts (fees, form URLs, trusted-flagger lists) live in the reference files and are always flagged **verify at runtime** rather than hardcoded — so the guidance doesn't rot.
 

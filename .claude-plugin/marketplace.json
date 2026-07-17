@@ -1,0 +1,20 @@
+{
+  "name": "goul4rt",
+  "description": "goul4rt's Claude Code plugins",
+  "owner": {
+    "name": "goul4rt",
+    "email": "aroldogooulart@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "content-takedown",
+      "description": "Global content-takedown runbook skill: DMCA, trademark/counterfeit, doxxing/privacy, revenge-porn & deepfake (NCII), and CSAM reporting.",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "goul4rt",
+        "email": "aroldogooulart@gmail.com"
+      }
+    }
+  ]
+}

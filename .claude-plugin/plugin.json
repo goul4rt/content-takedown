@@ -1,0 +1,26 @@
+{
+  "name": "content-takedown",
+  "description": "Global content-takedown runbook skill: DMCA, trademark/counterfeit, doxxing/privacy, revenge-porn & deepfake (NCII), and CSAM reporting — recon, evidence, the right channel and legal regime.",
+  "version": "1.0.0",
+  "author": {
+    "name": "goul4rt",
+    "email": "aroldogooulart@gmail.com"
+  },
+  "homepage": "https://github.com/goul4rt/content-takedown",
+  "repository": "https://github.com/goul4rt/content-takedown",
+  "license": "MIT",
+  "keywords": [
+    "dmca",
+    "takedown",
+    "content-removal",
+    "copyright",
+    "trademark",
+    "udrp",
+    "ncii",
+    "deepfakes",
+    "doxxing",
+    "privacy",
+    "brand-protection",
+    "osint"
+  ]
+}
