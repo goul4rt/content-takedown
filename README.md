@@ -10,17 +10,11 @@
 
 Most takedowns fail for two boring reasons. The requester tips off the operator before freezing evidence, or signs the notice in their own name and publishes it to a public database. This skill encodes the discipline that avoids both, plus the channel, legal basis, and escalation path for each content type, so a person or an AI agent can act correctly under pressure.
 
-## What is this, in plain terms?
-Suppose someone copies your logo, pretends to be your brand, sells fakes of your product, or posts your private photos and home address. Getting that taken down is confusing. You have to work out who is actually hosting the content, who to email or which form to fill in, what to say, and in what order. Do it wrong and the content usually stays up, or you end up exposing your own name in the process.
-
-This project is a plain checklist for exactly that. For each common situation (stolen work, brand impersonation, counterfeit products, leaked private data, intimate images or deepfakes, illegal content) it tells you where to send the request and how to back it up.
-
-You can use it two ways:
-1. Read it yourself and follow the steps by hand.
-2. Install it into an AI assistant (Claude Code). Then you describe your problem in normal words, and the assistant follows this guide to walk you through each step.
+## TL;DR
+A step-by-step checklist for getting stolen, fake, or harmful content off the internet: who hosts it, who to contact, what to say, and in what order. Read it yourself, or install it into an AI assistant (Claude Code) and just describe your problem in plain words.
 
 ## Table of contents
-- [What is this, in plain terms?](#what-is-this-in-plain-terms)
+- [TL;DR](#tldr)
 - [Why this exists](#why-this-exists)
 - [What it covers](#what-it-covers)
 - [The five invariants](#the-five-invariants)
