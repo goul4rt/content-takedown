@@ -1,6 +1,6 @@
 ---
 name: content-takedown
-description: Use when getting online content removed or de-indexed: copyright/DMCA, trademark/impersonation/counterfeit, illegal content (CSAM), privacy/doxxing/defamation, or non-consensual intimate imagery including AI-generated deepfakes/NCII. Covers recon (registrar/host/CDN), which channel and legal regime applies, evidence preservation, and protecting the requester's identity from public disclosure. Trigger on takedown, DMCA, counter-notice, delisting, revenge porn, deepfake removal, cybersquatting/UDRP, brand abuse, or "get this off the internet".
+description: "Use when getting online content removed or de-indexed, across copyright/DMCA, trademark/impersonation/counterfeit, illegal content (CSAM), privacy/doxxing/defamation, or non-consensual intimate imagery including AI-generated deepfakes/NCII. Covers recon (registrar/host/CDN), which channel and legal regime applies, evidence preservation, and protecting the requester's identity from public disclosure. Trigger on takedown, DMCA, counter-notice, delisting, revenge porn, deepfake removal, cybersquatting/UDRP, brand abuse, or 'get this off the internet'."
 ---
 
 # Content Takedown Runbook
