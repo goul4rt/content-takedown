@@ -1,100 +1,52 @@
 ---
 name: content-takedown
-description: Use when getting online content removed — copyright/DMCA, trademark/impersonation/counterfeit, illegal content (CSAM), or privacy/doxxing/non-consensual imagery/defamation — including recon (registrar/host/CDN), which channel and legal regime applies, and protecting the requester's identity from public disclosure.
+description: Use when getting online content removed or de-indexed — copyright/DMCA, trademark/impersonation/counterfeit, illegal content (CSAM), privacy/doxxing/defamation, or non-consensual intimate imagery including AI-generated deepfakes/NCII — covering recon (registrar/host/CDN), which channel and legal regime applies, evidence preservation, and protecting the requester's identity from public disclosure. Trigger on takedown, DMCA, counter-notice, delisting, revenge porn, deepfake removal, cybersquatting/UDRP, brand abuse, or "get this off the internet".
 ---
 
 # Content Takedown Runbook
 
 ## Overview
+Getting content off the internet means notifying the right infrastructure or platform layer, with the right legal basis, in the right order. Content type determines the channel; recon, evidence, and identity-protection mechanics are the same every time. Keep this file loaded; read the reference files only for the regime or form you actually need.
 
-Getting content off the internet means notifying the right infrastructure or platform layer, with the right legal basis, in the right order. The type of content determines the channel; the mechanics of recon, evidence, and identity-protection are the same every time.
+## Five invariants (apply to EVERY takedown)
+1. **Freeze evidence BEFORE the first notice.** Capture SHA-256 byte-identity (`curl -sL URL | shasum -a 256`), archive to web.archive.org/save and archive.today (add Perma.cc for litigation-grade; in Brazil use ata notarial or e-Not Provas via cartório for court-grade proof), save `curl -sI` headers, dig/RDAP output, and timestamped screenshots. Reason: hosts remove content within hours and unpreserved evidence is unrecoverable. EXCEPTION: never for illegal content (invariant 4).
+2. **Protect the requester's identity.** Notices are forwarded to Lumen (lumendatabase.org) by Google, Meta, GitHub, Reddit, Wikipedia and others; public view redacts PII by default but assume every field may surface. File as authorized agent under DMCA §512(c)(3) and DSA Art. 16; use attorney/agent name, professional address, and a role email — never the client's personal identity. If a name leaks, request Lumen redaction (case-by-case).
+3. **Prove file identity, not similarity.** Match SHA-256 (or the platform's perceptual hash for NCII). Never assert "looks the same"; assert byte- or hash-identity.
+4. **Never collect illegal content.** For CSAM: no download/save/hash/screenshot. Report the URL plus the site's own label to authorities (NCMEC CyberTipline, INHOPE, IWF, PHAROS, SaferNet BR). Take It Down (NCMEC) for minors' intimate imagery; StopNCII for adults.
+5. **A CDN/registrar is not the host.** CDNs are pass-through; registrars control the name; only the origin host removes files. Do not send removal demands to a CDN expecting deletion (forward/notify only). Cloudflare Email Routing MX is receive-only, not a hosting signal.
 
-**Five invariants apply to EVERY takedown, regardless of type. Agents reliably skip them under "just take it down fast" pressure. Do not.**
-
-## The five invariants
-
-### 1. Freeze evidence BEFORE the first notice
-Your first notice tips off the operator, who can wipe or alter the content. Capture first:
-- **Byte-identity proof:** `curl -s <infringing-url> | shasum -a 256` and compare to your original's hash. A matching SHA-256 = **literally the same file**, not "similar" — the single strongest exhibit.
-- **Neutral third-party preservation:** submit URLs to `web.archive.org/save/` and `archive.today`. Capture `curl -sI` headers and `dig`/RDAP output (they change).
-- **Timestamped screenshots** with URL bar + date visible.
-- ⚠️ **Exception — never applies to illegal content you cannot lawfully possess** (see type 3).
-
-### 2. Protect the requester's identity (Lumen exposure)
-Google, Cloudflare, X, WordPress and others forward notices **verbatim to the public Lumen Database (lumendatabase.org)** — the sender's name, address, and email become permanently searchable. This is acute for **doxxing/harassment victims** (a DMCA on your own stolen photos re-publishes your name) and for brands not wanting to signal enforcement.
-- File **as an authorized agent** ("acting on behalf of the rights holder / affected party"). Both DMCA §512(c)(3) and DSA Art. 16 explicitly permit an agent to sign. The agent's name appears, not the client's.
-- Use the **attorney's/agent's** name, a professional address, and a **role email** — never the client's personal name/email.
-- **Assume every form field may be published.** Put nothing anywhere you would not publish.
-
-### 3. Prove identity of the file, don't assert similarity
-"Their logo looks like mine" is weak. Matching SHA-256 + identical byte count is dispositive. Use it whenever the copy is a served file (image, video, PDF, asset).
-
-### 4. Never collect illegal content
-For suspected CSAM or anything whose mere possession is a crime: **do NOT download, save, hash-yourself, or screenshot it.** Report only the **URL + the site's own text label**, and hand to authorities who are legally authorized to retrieve it. Frame as measured fact ("the site's own taxonomy labels this X; this potentially constitutes Y; referred for verification") — never assert as verified what you must not verify.
-
-### 5. A CDN/registrar is not the host
-A CDN (Cloudflare, Akamai, Fastly, Bunny, Sucuri, CloudFront) is a **pass-through proxy** — it forwards your notice and may disclose the origin, but **does not remove content**. A registrar controls the **name**, not the content. Chase the disclosed **origin host** — that is the only layer that removes files. Note: Cloudflare Email Routing (MX = `*.mx.cloudflare.net`) is **receive-only** — you cannot send from a domain that uses it; send from real SMTP or the agent's own mailbox.
-
-## Step 1 — Recon (works for any domain)
-
-```bash
-# Registration data — RDAP is now authoritative (ICANN sunset WHOIS Jan 2025).
-# whois returning blank on a new gTLD (.app/.shop/.dev) is EXPECTED, not an error.
-curl -s https://rdap.org/domain/<domain> | jq   # registrar, dates, abuse contact
-# ccTLDs (.fr/.de/.uk/.br) may be WHOIS-only or use the registry's own lookup.
-
-dig +short <domain>                              # A record → IP
-whois <IP>    # or: curl -s https://rdap.org/ip/<IP> | jq   → network owner = host or CDN
-curl -sI https://<domain>/ | grep -iE 'server|via|cf-ray|x-amz-cf-id|x-served-by|x-akamai'
-crt.sh: https://crt.sh/?q=%25.<domain>           # subdomains / sometimes origin hostname
-```
-Fingerprints: `CF-RAY`=Cloudflare · `X-Amz-Cf-Id`=CloudFront/AWS · `X-Served-By`+`Via: varnish`=Fastly · `AkamaiGHost`=Akamai · `Sucuri/Cloudproxy`=Sucuri · `BunnyCDN`=Bunny. If the IP resolves straight to a host (no CDN), that IP **is** the origin — skip the CDN chase.
-
-Find a US host's DMCA agent: `copyright.gov/dmca-directory/`. First abuse probe: `abuse@<domain>` (RFC 2142); also abuse.net, AbuseIPDB, the RIR's `abuse-c`.
+## Step 1 — Recon
+See `references/recon-fingerprints.md`. Fast path: RDAP via rdap.org (ICANN sunset WHOIS 28 Jan 2025; blank data on new gTLDs is expected; many ccTLDs are RDAP-now, e.g. rdap.registro.br for .br). `dig +short`, `whois <IP>`, then `curl -sI` header fingerprints to identify CDN vs origin. `crt.sh` for subdomains/origin leaks. DMCA agent lookup at copyright.gov/dmca-directory. Abuse contacts: abuse@domain (RFC 2142), abuse.net, AbuseIPDB, RIR abuse-c.
 
 ## Step 2 — Route by content type
 
-| Type | Primary channel | Special rules |
-|---|---|---|
-| **Copyright** | DMCA §512(c) to host/DMCA-agent; §512(d) to search engines; forward via CDN if origin hidden | Six required elements (below). **§512(f):** don't overclaim — claiming works you don't own or fair uses = liability. |
-| **Trademark / impersonation / counterfeit** | Host AUP (NOT DMCA — copyright ≠ trademark) + platform brand programs (Amazon Brand Registry, eBay VeRO, Meta/Google TM). For the domain itself → **UDRP** | UDRP (WIPO ~$1,500, ~45–60d): prove all 3 — identical/confusingly similar + no legitimate interest + bad faith. Remedy = transfer. **URS** (~$300–500, ~2–3wk): clear-cut new-gTLD abuse, suspension only. |
-| **Illegal / CSAM** | **Authorities, not takedown forms.** NCMEC CyberTipline (`report.cybertip.org`), INHOPE hotline (`inhope.org`), IWF UK, PHAROS FR, SaferNet BR | **Invariant 4 — never collect.** Keep separate from any copyright claim. Take It Down (`takeitdown.ncmec.org`) for intimate imagery of a minor. |
-| **Privacy / doxxing / NCII (adult)** | Google PII/doxxing removal (`support.google.com/websearch/answer/9673730`) + **StopNCII.org** (on-device hash, image never leaves device) | Search removal ≠ source removal — do both. EU: RTBF (GDPR Art. 17). **Invariant 2 is critical here** — don't re-expose the victim on Lumen. |
-| **Defamation** | Usually **requires a court order** — platforms rarely remove on notice; US §230 immunizes them; BR retains judicial-order rule for honor crimes | Get the order first, then present to host/search engine. |
+| Content type | Primary channel | Legal basis | Notes |
+|---|---|---|---|
+| Copyright | §512(c) notice to host/agent; §512(d) to search engines; forward via CDN | US DMCA §512 (six elements; §512(f) overclaim liability) | Non-US hosts that never claimed §512 owe no DMCA duty — use local law/host AUP |
+| Trademark / impersonation / counterfeit | Host AUP + brand programs (Amazon Brand Registry, eBay VeRO, Meta Brand Rights Protection, Google/TikTok/Shopify IP) + UDRP or URS | Not DMCA | UDRP: transfer remedy. URS: suspension only. Fees/timeline: verify at runtime |
+| Illegal / CSAM | Authorities, NOT forms | ECA art. 241 (BR); national criminal law | Never collect (invariant 4). Report URL + site label only |
+| NCII / deepfake (adult) | StopNCII.org (on-device hash) + platform NCII flow + US TAKE IT DOWN notice (48h) | US TAKE IT DOWN Act (in force); BR MCI art. 21; state laws | Covers AI "digital forgeries" of real people |
+| NCII (minor) | NCMEC Take It Down + CyberTipline | Federal criminal / ECA | Treat as illegal content |
+| Privacy / doxxing | Google "Results about you" + PII removal form; source-host removal | GDPR Art. 17 (EU RTBF); local privacy law | Search removal ≠ source removal |
+| Defamation | Usually court order | US §230; BR: honor crimes still need court order (STF Tema 987) | Notice can still prompt voluntary removal |
 
-## Step 3 — Channel order & escalation
+## Step 3 — Channel order and escalation
+Freeze evidence → registrar/registrant abuse → CDN (reveal/notify origin) → origin host (removal) → search de-index → platform/payment/app-store chokepoints → authorities → escalate.
+Escalation ladder: CDN → host → registrar abuse → registry abuse → ICANN compliance (contract failures ONLY) and/or UDRP/URS. Beyond the host: search de-indexing, payment processors (Stripe/PayPal/CCBill abuse), ad networks (Google Ads abuse), app stores (Apple App Store dispute, Google Play IP form), social impersonation flows. Keep a tracker; screenshot before/after every submission.
 
-**Order:** freeze evidence → registrar/registrant abuse → CDN (to reveal origin) → **origin host (removal)** → search de-index → platform/payment/app-store chokepoints → authorities (if illegal) → escalate.
+## Defense side (client RECEIVES a takedown)
+If your client is the target: do not delete their local copies. For DMCA, a §512(g) counter-notice (10–14 business-day window) restores content if the claimant does not sue — but exposes the counter-notifier's identity and consents to jurisdiction; advise accordingly. Note §512(f) liability runs against knowingly false notices, giving leverage against abusive claims. For TAKE IT DOWN / NCII removals there is no robust statutory counter-notice — dispute through the platform's appeal channel.
 
-**Escalation ladder if ignored:** CDN → host/DMCA-agent → registrar abuse → registry abuse → **ICANN compliance** (contract failures only, e.g. dead abuse contact — not content disputes) and/or UDRP/URS for the name.
+## Common mistakes → fix
+- Signing in client's own name → file as agent.
+- WHOIS blank on new gTLD → use RDAP.
+- DMCA to Cloudflare expecting removal → DMCA the real host; only notify/forward via CDN.
+- DMCA for a trademark problem → AUP + brand programs + UDRP/URS.
+- Collecting CSAM → report URL + label only.
+- Asserting similarity → prove SHA-256/hash identity.
+- Filing before freezing evidence → freeze first.
+- Overbroad copyright claims → §512(f) exposure.
+- Treating a CDN/registrar acknowledgement as a takedown.
 
-**Beyond the host** (starve/hide the operation): search de-indexing (Google/Bing removal forms); payment processors (Stripe/PayPal/CCBill abuse — often ends a store faster than a host); ad networks (Google Ads/AdSense); app stores (Apple/Google Play IP forms); social-platform impersonation/IP flows.
-
-Keep a **tracker**: one row per channel — target, date, ticket/protocol #, status. **Screenshot before and after every submission.**
-
-## Legal regimes (which bites where)
-
-- **US — DMCA §512.** §512(c)(3) notice needs six elements: (1) signature; (2) the copyrighted work; (3) the infringing material + locating info (URLs); (4) contact info; (5) good-faith-belief statement; (6) accuracy + authority under penalty of perjury. **§512(g) counter-notice** forces restore in **10–14 business days** unless you file suit — a takedown can commit you to litigation.
-- **EU — DSA (Reg. 2022/2065) Art. 16** notice-and-action for all "illegal content": explain why illegal + exact URL + notifier name/email (waived for CSAM) + good-faith statement. Trusted-flagger notices (Art. 22) are prioritized.
-- **France — LCEN Art. 6** host liability on knowledge; formal notification per Art. 6-I-5. PHAROS = `internet-signalement.gouv.fr`.
-- **Germany — DSA/DDG** (NetzDG largely repealed May 2024 — route via DSA Art. 16).
-- **Brazil — Marco Civil (Lei 12.965).** ⚠️ **STF Tema 987 (Jun 2025)** made notice-and-takedown the general rule (extrajudicial notice now creates liability for most illegal content); serious crimes → remove immediately; **defamation/honor crimes still need a court order**; NCII (Art. 21) removable on simple notice. Copyright = Lei 9.610/98; CSAM = ECA Art. 241.
-- **UK — Online Safety Act (Ofcom)** is systemic compliance, not per-item notice.
-- Many hosts accept a DMCA-style notice globally regardless of jurisdiction. A US DMCA has no force on a non-US host that never claimed §512 — use DSA/local law there.
-
-## Common mistakes
-
-| Mistake | Fix |
-|---|---|
-| Signing in the client's own name | File as authorized agent; assume Lumen publishes every field (esp. doxxing victims) |
-| "whois failed" on a new gTLD | Use RDAP — whois is expected to be blank; ccTLDs use their own registry |
-| DMCA to Cloudflare expecting removal | CDN only forwards + reveals origin; DMCA the real host |
-| Using DMCA for a trademark/counterfeit problem | Copyright ≠ trademark — use host AUP + brand programs + UDRP |
-| Collecting/screenshotting suspected CSAM | Report URL + label only to authorities; never possess it |
-| "Their logo looks like mine" | Prove byte identity with matching SHA-256 |
-| Filing before freezing evidence | Notice tips off the operator; capture SHA-256 + archive first |
-| Overbroad claim (works you don't own / fair use) | §512(f) liability — scope to what you can substantiate |
-| Treating a CDN/registrar ack as a takedown | Only the origin host removes content; chase it |
-
-## Verify at runtime
-Forms, fees, and legal contours change. Re-check: WIPO/URS fees; Brazil STF Tema 987 legislative follow-up; LCEN prior-contact requirement; per-ccTLD RDAP availability; exact Google/platform form URLs (search the phrasing if a link moved).
+## Verify at runtime (do not hardcode)
+WIPO/URS fees and timelines; exact form URLs (`references/forms-directory.md`); per-ccTLD RDAP coverage; DSA trusted-flagger list; LCEN prior-contact requirement; current Lumen contributor list; any NO FAKES Act enactment.
